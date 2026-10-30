@@ -5,275 +5,93 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SN Query · 序列号查询</title>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-  }
-  .card {
-    background: #fff;
-    border-radius: 16px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
-    padding: 40px;
-    width: 100%;
-    max-width: 500px;
-  }
-  .card h1 {
-    font-size: 22px;
-    color: #333;
-    margin-bottom: 8px;
-    text-align: center;
-  }
-  .card .sub {
-    text-align: center;
-    color: #999;
-    font-size: 13px;
-    margin-bottom: 30px;
-  }
-  .input-group {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-  }
-  .input-group input {
-    flex: 1;
-    padding: 14px 16px;
-    border: 2px solid #e0e0e0;
-    border-radius: 10px;
-    font-size: 16px;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-  .input-group input:focus {
-    border-color: #667eea;
-  }
-  .btn {
-    padding: 14px 28px;
-    border: none;
-    border-radius: 10px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: transform 0.1s, box-shadow 0.2s;
-    font-weight: 600;
-  }
-  .btn-primary {
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    color: #fff;
-    width: 100%;
-  }
-  .btn-primary:active {
-    transform: scale(0.98);
-  }
-  .btn-primary:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-  .result {
-    margin-top: 25px;
-    padding: 20px;
-    border-radius: 10px;
-    display: none;
-  }
-  .result.success {
-    display: block;
-    background: #f0f9ff;
-    border: 1px solid #bae6fd;
-  }
-  .result.error {
-    display: block;
-    background: #fef2f2;
-    border: 1px solid #fecaca;
-    color: #dc2626;
-  }
-  .result-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 8px 0;
-    border-bottom: 1px solid #e0f2fe;
-  }
-  .result-row:last-child { border-bottom: none; }
-  .result-row .label { color: #666; font-size: 14px; }
-  .result-row .value { color: #333; font-weight: 600; font-size: 15px; }
-  .badge {
-    padding: 3px 10px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-  }
-  .badge.ok { background: #dcfce7; color: #16a34a; }
-  .badge.no { background: #fef2f2; color: #dc2626; }
-  .admin-link {
-    display: block;
-    text-align: center;
-    margin-top: 20px;
-    color: #667eea;
-    text-decoration: none;
-    font-size: 14px;
-  }
-  .admin-link:hover { text-decoration: underline; }
-
-  /* 批量导入弹层 */
-  .modal-overlay {
-    display: none;
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.5);
-    z-index: 1000;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-  }
-  .modal-overlay.show { display: flex; }
-  .modal {
-    background: #fff;
-    border-radius: 16px;
-    padding: 30px;
-    width: 100%;
-    max-width: 700px;
-    max-height: 90vh;
-    overflow-y: auto;
-  }
-  .modal h2 {
-    font-size: 20px;
-    margin-bottom: 20px;
-    color: #333;
-  }
-  .modal-close {
-    float: right;
-    background: none;
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
-    color: #999;
-  }
-  .tab-bar { margin-bottom: 20px; }
-  .tab-bar button {
-    padding: 10px 20px;
-    border: none;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 600;
-  }
-  .tab-bar button.active {
-    background: #667eea;
-    color: #fff;
-  }
-  .tab-bar button:not(.active) {
-    background: #e5e7eb;
-    color: #666;
-  }
-  .tab-bar button:first-child { border-radius: 8px 0 0 8px; }
-  .tab-bar button:last-child { border-radius: 0 8px 8px 0; }
-  .tab-content { display: none; }
-  .tab-content.active { display: block; }
-  .file-input {
-    width: 100%;
-    padding: 12px;
-    border: 2px dashed #d1d5db;
-    border-radius: 8px;
-    margin-bottom: 15px;
-    cursor: pointer;
-  }
-  .import-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 15px;
-    font-size: 14px;
-  }
-  .import-table th, .import-table td {
-    border: 1px solid #e5e7eb;
-    padding: 8px;
-    text-align: left;
-  }
-  .import-table th { background: #f9fafb; font-weight: 600; }
-  .import-table input { width: 100%; padding: 6px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 13px; }
-  .tip { color: #6b7280; font-size: 13px; margin-bottom: 12px; }
-  .toast {
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 14px 24px;
-    border-radius: 8px;
-    color: #fff;
-    font-weight: 600;
-    z-index: 2000;
-    display: none;
-  }
-  .toast.show { display: block; }
-  .toast.success { background: #16a34a; }
-  .toast.error { background: #dc2626; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  padding: 40px;
+  width: 100%;
+  max-width: 500px;
+}
+.card h1 { font-size: 22px; color: #333; margin-bottom: 8px; text-align: center; }
+.card .sub { text-align: center; color: #999; font-size: 13px; margin-bottom: 30px; }
+.input-group { display: flex; gap: 10px; margin-bottom: 20px; }
+.input-group input {
+  flex: 1; padding: 14px 16px; border: 2px solid #e0e0e0; border-radius: 10px;
+  font-size: 16px; outline: none; transition: border-color 0.2s;
+}
+.input-group input:focus { border-color: #667eea; }
+.btn {
+  padding: 14px 28px; border: none; border-radius: 10px; font-size: 16px;
+  cursor: pointer; font-weight: 600;
+}
+.btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; width: 100%; }
+.btn-primary:active { transform: scale(0.98); }
+.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+.result { margin-top: 25px; padding: 20px; border-radius: 10px; display: none; }
+.result.show { display: block; }
+.result.success { background: #f0f9ff; border: 1px solid #bae6fd; }
+.result.error { background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; }
+.result-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e0f2fe; }
+.result-row:last-child { border-bottom: none; }
+.result-row .label { color: #666; font-size: 14px; }
+.result-row .value { color: #333; font-weight: 600; font-size: 15px; }
+.badge { padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+.badge.ok { background: #dcfce7; color: #16a34a; }
+.badge.no { background: #fef2f2; color: #dc2626; }
+.footer { text-align: center; margin-top: 20px; }
+.footer a { color: #667eea; text-decoration: none; font-size: 14px; }
+.footer a:hover { text-decoration: underline; }
+.toast {
+  position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+  padding: 14px 24px; border-radius: 8px; color: #fff; font-weight: 600;
+  z-index: 2000; display: none;
+}
+.toast.show { display: block; }
+.toast.success { background: #16a34a; }
+.toast.error { background: #dc2626; }
 </style>
 </head>
 <body>
-
 <div class="card">
   <h1>🔍 序列号查询</h1>
   <p class="sub">输入设备序列号，查询型号与保修信息</p>
-
   <div class="input-group">
     <input type="text" id="snInput" placeholder="请输入序列号，如 F2LXV5KQ" autocomplete="off" onkeypress="if(event.key==='Enter')doQuery()">
   </div>
   <button class="btn btn-primary" id="queryBtn" onclick="doQuery()">查 询</button>
-
   <div class="result" id="resultBox"></div>
-
-  <a href="admin.html" class="admin-link">🔐 管理后台</a>
-  <button class="admin-link" style="display:block; margin: 10px auto 0; background:none; border:none; color:#764ba2; cursor:pointer; font-size:14px;" onclick="openBatchModal()">📦 批量导入设备</button>
-</div>
-
-<!-- 批量导入弹层 -->
-<div class="modal-overlay" id="batchModal">
-  <div class="modal">
-    <button class="modal-close" onclick="closeBatchModal()">&times;</button>
-    <h2>📦 批量导入设备</h2>
-
-    <div class="tab-bar">
-      <button id="tabOcrBtn" class="active" onclick="switchTab('ocr')">📷 OCR拍照识别</button>
-      <button id="tabCsvBtn" onclick="switchTab('csv')">📋 表格/CSV导入</button>
-    </div>
-
-    <!-- OCR Tab -->
-    <div class="tab-content active" id="ocrTab">
-      <p class="tip">上传设备标签照片，自动识别序列号。手写识别率约70-85%，请核对后提交。</p>
-      <input type="file" class="file-input" id="ocrFiles" multiple accept="image/*" onchange="handleOcrFiles(event)">
-      <div id="ocrLoading" style="display:none; color:#667eea; padding:10px;">🔍 识别中，请稍候...（首次加载语言包约需10秒）</div>
-      <div id="ocrResults"></div>
-      <button class="btn btn-primary" id="submitOcrBtn" style="display:none; margin-top:15px;" onclick="submitBatchOcr()">✅ 确认提交到数据库</button>
-    </div>
-
-    <!-- CSV Tab -->
-    <div class="tab-content" id="csvTab">
-      <p class="tip">格式：序列号,型号,激活时间(YYYY-MM-DD)，每行一个，或从Excel复制粘贴</p>
-      <textarea id="csvInput" rows="8" placeholder="F2LXV5KQ,iPhone 15 Pro,2025-01-15&#10;G8KM3P2R,iPhone 14,2024-11-03" style="width:100%; padding:12px; border:1px solid #d1d5db; border-radius:8px; font-family:monospace; font-size:14px; resize:vertical;"></textarea>
-      <button class="btn" style="margin-top:12px; background:#e5e7eb; color:#333;" onclick="parseCsvImport()">📥 解析预览</button>
-      <div id="csvPreview"></div>
-      <button class="btn btn-primary" id="submitCsvBtn" style="display:none; margin-top:15px;" onclick="submitCsvImport()">✅ 确认提交到数据库</button>
-    </div>
+  <div class="footer">
+    <a href="admin.html">🔐 管理后台</a>
   </div>
 </div>
-
 <div class="toast" id="toast"></div>
-
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script>
-// ===== 查询功能 =====
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  setTimeout(() => t.className = 'toast', 3000);
+}
+
 async function doQuery() {
   const sn = document.getElementById('snInput').value.trim().toUpperCase();
   const box = document.getElementById('resultBox');
   const btn = document.getElementById('queryBtn');
-
   if (!sn) { showToast('请输入序列号', 'error'); return; }
-
   btn.disabled = true;
   btn.textContent = '查询中...';
   box.className = 'result';
-
   try {
     const res = await fetch('/api/query', {
       method: 'POST',
@@ -281,63 +99,30 @@ async function doQuery() {
       body: JSON.stringify({ sn })
     });
     const data = await res.json();
-
     if (data.ok) {
       const d = data.data;
-      box.className = 'result success';
-      box.innerHTML = `
-        <div class="result-row"><span class="label">序列号</span><span class="value">${sn}</span></div>
-        <div class="result-row"><span class="label">型号</span><span class="value">${d.model}</span></div>
-        <div class="result-row"><span class="label">激活时间</span><span class="value">${d.activate_time}</span></div>
-        <div class="result-row"><span class="label">保修截止</span><span class="value">${d.warranty_end}</span></div>
-        <div class="result-row"><span class="label">保修状态</span><span class="badge ${d.in_warranty ? 'ok' : 'no'}">${d.in_warranty ? '✅ 在保' : '❌ 过保'}</span></div>
-      `;
+      box.className = 'result show success';
+      box.innerHTML = '<div class="result-row"><span class="label">序列号</span><span class="value">' + escapeHtml(sn) + '</span></div>'
+        + '<div class="result-row"><span class="label">型号</span><span class="value">' + escapeHtml(d.model) + '</span></div>'
+        + '<div class="result-row"><span class="label">激活时间</span><span class="value">' + escapeHtml(d.activate_time) + '</span></div>'
+        + '<div class="result-row"><span class="label">保修截止</span><span class="value">' + escapeHtml(d.warranty_end) + '</span></div>'
+        + '<div class="result-row"><span class="label">保修状态</span><span class="badge ' + (d.in_warranty ? 'ok' : 'no') + '">' + (d.in_warranty ? '✅ 在保' : '❌ 过保') + '</span></div>';
     } else {
-      box.className = 'result error';
-      box.innerHTML = `❌ ${data.error || '未查询到该设备'}`;
+      box.className = 'result show error';
+      box.innerHTML = '❌ ' + escapeHtml(data.error || '未查询到该设备');
     }
   } catch (e) {
-    box.className = 'result error';
-    box.innerHTML = `❌ 网络错误：${e.message}`;
+    box.className = 'result show error';
+    box.innerHTML = '❌ 网络错误：' + escapeHtml(e.message);
   }
-
   btn.disabled = false;
   btn.textContent = '查 询';
 }
 
-// ===== Toast =====
-function showToast(msg, type) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = `toast show ${type}`;
-  setTimeout(() => t.className = 'toast', 3000);
+function escapeHtml(text) {
+  const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+  return String(text).replace(/[&<>"']/g, m => map[m]);
 }
-
-// ===== 批量导入弹层 =====
-function openBatchModal() {
-  document.getElementById('batchModal').classList.add('show');
-}
-function closeBatchModal() {
-  document.getElementById('batchModal').classList.remove('show');
-}
-
-function switchTab(tab) {
-  document.getElementById('ocrTab').classList.toggle('active', tab === 'ocr');
-  document.getElementById('csvTab').classList.toggle('active', tab === 'csv');
-  document.getElementById('tabOcrBtn').classList.toggle('active', tab === 'ocr');
-  document.getElementById('tabCsvBtn').classList.toggle('active', tab === 'csv');
-}
-
-// ===== OCR识别 =====
-let ocrResults = [];
-
-async function handleOcrFiles(e) {
-  const files = e.target.files;
-  if (!files || files.length === 0) return;
-
-  document.getElementById('ocrLoading').style.display = 'block';
-  document.getElementById('ocrResults').innerHTML = '';
-  ocrResults = [];
-
-  for (let i = 0; i < files.length; i++) {
-    c
+</script>
+</body>
+</html>
