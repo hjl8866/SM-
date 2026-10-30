@@ -5,4 +5,4 @@ pages_build_output_dir = "."
 [[d1_databases]]
 binding = "DB"
 database_name = "sn_query"
-database_id = "替换为你的D1数据库ID"
+database_id = "91237873-806c-4e02-a757-eb24fdf0cbe5"
